@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Muiz misses Emma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #08050d;
+    --bg-soft: #120a1c;
+    --magenta: #ff2d6e;
+    --pink: #ff8fb3;
+    --gold: #ffd76a;
+    --ink: #f5ecff;
+    --muted: #b79bc9;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Quicksand', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+  ::selection{ background: var(--magenta); color: #fff; }
+
+  /* ---------- ambient floating hearts (whole page) ---------- */
+  #ambient{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .floathearts span{
+    position: absolute;
+    bottom: -10%;
+    font-size: 1.2rem;
+    opacity: 0;
+    animation: rise linear infinite;
+    filter: drop-shadow(0 0 6px rgba(255,45,110,.5));
+  }
+  @keyframes rise{
+    0%{ transform: translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    10%{ opacity:.85; }
+    90%{ opacity:.6; }
+    100%{ transform: translateY(-110vh) translateX(var(--drift,20px)) rotate(360deg); opacity:0; }
+  }
+
+  section{
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    padding: 6vh 6vw;
+    text-align:center;
+  }
+
+  .eyebrow{
+    font-size: .72rem;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--pink);
+    opacity:.85;
+    margin-bottom: 1.1rem;
+  }
+
+  h1, h2, .display{
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    line-height: 1.05;
+  }
+
+  /* ---------- HERO ---------- */
+  #hero h1{
+    font-size: clamp(2.6rem, 9vw, 5.4rem);
+    background: linear-gradient(95deg, var(--ink) 30%, var(--pink) 60%, var(--gold) 90%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  #hero .sub{
+    margin-top: 1.4rem;
+    max-width: 38ch;
+    font-size: clamp(1rem, 2.6vw, 1.2rem);
+    color: var(--muted);
+    line-height:1.6;
+  }
+  .heart-pulse{
+    margin-top: 2.6rem;
+    font-size: 2rem;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.18); }
+  }
+  .scroll-cue{
+    position:absolute;
+    bottom: 3.2rem;
+    font-size: .72rem;
+    letter-spacing: .3em;
+    text-transform:uppercase;
+    color: var(--muted);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.5rem;
+    animation: fade 2.4s ease-in-out infinite;
+  }
+  @keyframes fade{ 0%,100%{ opacity:.35; } 50%{ opacity:1; } }
+  .scroll-cue::after{
+    content:'';
+    width:1px; height: 30px;
+    background: linear-gradient(var(--pink), transparent);
+  }
+
+  /* ---------- GALAXY HEART ---------- */
+  #galaxy{ background: radial-gradient(ellipse at center, #150a22 0%, #08050d 70%); }
+  #galaxy h2{
+    font-size: clamp(1.6rem, 4.6vw, 2.4rem);
+    margin-bottom: .6rem;
+  }
+  #galaxy .sub{ color: var(--muted); margin-bottom: 1rem; max-width: 40ch; }
+  canvas#heartCanvas{
+    width: min(92vw, 560px);
+    height: min(92vw, 560px);
+    max-height: 60vh;
+  }
+
+  /* ---------- REASONS (scroll cards) ---------- */
+  #reasons{ padding-top: 10vh; padding-bottom: 10vh; gap: 0; }
+  #reasons h2{ font-size: clamp(1.8rem, 5vw, 2.6rem); margin-bottom: 3.4rem; }
+  .reel{
+    display:flex;
+    flex-direction:column;
+    gap: 1.4rem;
+    width: 100%;
+    max-width: 520px;
+  }
+  .card{
+    background: linear-gradient(160deg, rgba(255,45,110,.10), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,143,179,.18);
+    border-radius: 18px;
+    padding: 1.6rem 1.8rem;
+    text-align:left;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity .8s ease, transform .8s ease;
+    backdrop-filter: blur(6px);
+  }
+  .card.in{ opacity:1; transform: translateY(0); }
+  .card .num{
+    font-family:'Cormorant Garamond', serif;
+    color: var(--gold);
+    font-size: .95rem;
+    opacity:.8;
+    display:block;
+    margin-bottom: .3rem;
+  }
+  .card p{ font-size: 1.05rem; line-height:1.55; color: var(--ink); }
+
+  /* ---------- PARA TI / LETTER CARD ---------- */
+  #letter{ background: var(--bg-soft); }
+  .letter-card{
+    width: min(92vw, 480px);
+    background: radial-gradient(circle at 30% 0%, rgba(255,45,110,.18), transparent 60%), #0c0714;
+    border: 1px solid rgba(255,143,179,.25);
+    border-radius: 22px;
+    padding: 2.6rem 2.2rem;
+    box-shadow: 0 30px 80px -20px rgba(255,45,110,.25);
+    opacity:0;
+    transform: scale(.92);
+    transition: opacity 1s ease, transform 1s ease;
+  }
+  .letter-card.in{ opacity:1; transform: scale(1); }
+  .letter-card .icon{ font-size: 2.4rem; margin-bottom: 1rem; }
+  .letter-card h3{
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.8rem;
+    color: var(--pink);
+    margin-bottom: 1rem;
+  }
+  .letter-card p{
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.75;
+    margin-bottom: .9rem;
+  }
+  .signoff{
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink);
+    font-size: 1.1rem;
+    margin-top: 1.4rem;
+  }
+
+  /* ---------- HUG BUTTON ---------- */
+  #hug{ background: linear-gradient(180deg, var(--bg-soft), var(--bg)); }
+  #hug h2{ font-size: clamp(1.7rem, 4.6vw, 2.3rem); margin-bottom: .8rem; }
+  #hug .sub{ color: var(--muted); margin-bottom: 2.2rem; max-width: 36ch; }
+  .hug-btn{
+    position:relative;
+    padding: 1rem 2.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--magenta);
+    background: rgba(255,45,110,.08);
+    color: var(--ink);
+    font-family:'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: transform .25s ease, background .25s ease;
+    z-index: 3;
+  }
+  .hug-btn:hover{ background: rgba(255,45,110,.2); transform: translateY(-2px); }
+  .hug-btn:active{ transform: scale(.96); }
+  #burst{
+    position: fixed;
+    inset:0;
+    pointer-events:none;
+    z-index: 50;
+    overflow:hidden;
+  }
+  #burst span{
+    position:absolute;
+    font-size: 1.6rem;
+    opacity: 0;
+  }
+  .hug-msg{
+    margin-top: 1.6rem;
+    min-height: 1.6rem;
+    font-family:'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--gold);
+    font-size: 1.05rem;
+    opacity:0;
+    transition: opacity .6s ease;
+  }
+  .hug-msg.show{ opacity:1; }
+
+  footer{
+    position: relative;
+    z-index:2;
+    text-align:center;
+    padding: 3rem 1.5rem 3.4rem;
+    color: var(--muted);
+    font-size: .82rem;
+    letter-spacing: .03em;
+    background: var(--bg);
+  }
+  footer .heart-line{ color: var(--magenta); margin-bottom: .4rem; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ambient" class="floathearts"></div>
+<div id="burst"></div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="eyebrow">For Emma, from Muiz</div>
+  <h1>I miss you<br>more than I'm<br>letting on.</h1>
+  <p class="sub">I've been coding all day so my hands have something to do while the rest of me is just&nbsp;waiting for you to come online.</p>
+  <div class="heart-pulse">❤️</div>
+  <div class="scroll-cue">keep scrolling</div>
+</section>
+
+<!-- GALAXY HEART -->
+<section id="galaxy">
+  <div class="eyebrow">a little universe, just for you</div>
+  <h2>Every star here<br>spells your name.</h2>
+  <p class="sub">A whole galaxy and somehow it still circles back to one person.</p>
+  <canvas id="heartCanvas"></canvas>
+</section>
+
+<!-- REASONS -->
+<section id="reasons">
+  <h2>Things I've thought<br>since this morning</h2>
+  <div class="reel">
+    <div class="card"><span class="num">01</span><p>Made coffee, opened my laptop, started coding — and somewhere in there started missing you instead of debugging.</p></div>
+    <div class="card"><span class="num">02</span><p>Checked if you were online way more times than I'll ever admit out loud.</p></div>
+    <div class="card"><span class="num">03</span><p>Got bored, ran out of things to do, and the only thing left on my mind was you.</p></div>
+    <div class="card"><span class="num">04</span><p>Kept thinking about how much better today would feel with your voice in it.</p></div>
+    <div class="card"><span class="num">05</span><p>Built this whole page instead of finishing my work, because apparently this is what missing you turns into.</p></div>
+    <div class="card"><span class="num">06</span><p>Just want to hug you. That's it. That's the whole thought, on repeat.</p></div>
+  </div>
+</section>
+
+<!-- LETTER -->
+<section id="letter">
+  <div class="letter-card">
+    <div class="icon">💌</div>
+    <h3>Para ti, Emma</h3>
+    <p>You're the reason a boring coding day still felt like it was missing something. I've been online, building, fixing, scrolling — and every bit of it had you somewhere in the background.</p>
+    <p>I just want to hold you right now. Not over a screen. For real. Until then, this is me sending it the only way I can.</p>
+    <p class="signoff">— Muiz, still waiting for you to come online.</p>
+  </div>
+</section>
+
+<!-- HUG BUTTON -->
+<section id="hug">
+  <h2>Since I can't hug you<br>right now...</h2>
+  <p class="sub">tap this. it's not the same, but it's everything I've got from here.</p>
+  <button class="hug-btn" id="hugBtn">Send Emma a hug 🤗</button>
+  <div class="hug-msg" id="hugMsg">sent. go check your heart, it just got warmer.</div>
+</section>
+
+<footer>
+  <div class="heart-line">♥ ♥ ♥</div>
+  made with too much missing-you energy by Muiz, for Emma
+</footer>
+
+<script>
+/* ---------------- ambient floating hearts ---------------- */
+(function(){
+  const wrap = document.getElementById('ambient');
+  const hearts = ['❤️','💗','💕','✨','💫'];
+  const count = window.innerWidth < 600 ? 16 : 26;
+  for(let i=0;i<count;i++){
+    const s = document.createElement('span');
+    s.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+    const left = Math.random()*100;
+    const dur = 9 + Math.random()*10;
+    const delay = Math.random()*-dur;
+    const size = .8 + Math.random()*1.4;
+    const drift = (Math.random()*2-1)*80;
+    s.style.left = left+'vw';
+    s.style.fontSize = size+'rem';
+    s.style.setProperty('--drift', drift+'px');
+    s.style.animationDuration = dur+'s';
+    s.style.animationDelay = delay+'s';
+    wrap.appendChild(s);
+  }
+})();
+
+/* ---------------- heart galaxy canvas ---------------- */
+(function(){
+  const canvas = document.getElementById('heartCanvas');
+  const ctx = canvas.getContext('2d');
+  let w,h,dpr;
+
+  function size(){
+    dpr = Math.min(window.devicePixelRatio||1, 2);
+    const rect = canvas.getBoundingClientRect();
+    w = rect.width; h = rect.height;
+    canvas.width = w*dpr; canvas.height = h*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener('resize', size);
+  size();
+
+  // heart-shaped particles
+  const particles = [];
+  const N = 380;
+  for(let i=0;i<N;i++){
+    const t = Math.random()*Math.PI*2;
+    const r = 0.55 + Math.random()*0.45; // scale jitter so it's not a thin outline
+    const x = 16*Math.pow(Math.sin(t),3);
+    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+    particles.push({
+      baseX: x*r, baseY: y*r,
+      angle: Math.random()*Math.PI*2,
+      speed: 0.15 + Math.random()*0.25,
+      radius: Math.random()*6,
+      size: 0.8 + Math.random()*1.8,
+      hue: Math.random() < 0.7 ? 'pink' : 'gold',
+      twinkle: Math.random()*Math.PI*2
+    });
+  }
+
+  // orbiting words (like the reference video's spiral labels)
+  const words = ['miss you','come online','bored without you','thinking of you','hurry back','your voice','one hug?','emma ❤'];
+  const labels = words.map((word,i)=>({
+    word,
+    angle: (i/words.length)*Math.PI*2,
+    radius: 0.78 + (i%2)*0.08,
+    speed: 0.06 + (i%3)*0.02
+  }));
+
+  let rot = 0;
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    const cx = w/2, cy = h/2*1.05;
+    const scale = Math.min(w,h)/34;
+
+    rot += 0.0026;
+
+    // background glow
+    const glow = ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(w,h)/2);
+    glow.addColorStop(0,'rgba(255,45,110,0.16)');
+    glow.addColorStop(1,'rgba(255,45,110,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0,0,w,h);
+
+    particles.forEach(p=>{
+      p.angle += p.speed*0.012;
+      p.twinkle += 0.05;
+      const wob = Math.sin(p.angle)*p.radius;
+      const a = rot;
+      const px = p.baseX*Math.cos(a) - p.baseY*Math.sin(a)*0.0 + wob*0.0;
+      // simple rotation in 2D plane with slight bob for life-like motion
+      const rx = p.baseX*Math.cos(a) - p.baseY*Math.sin(a);
+      const ry = p.baseX*Math.sin(a) + p.baseY*Math.cos(a);
+      const x = cx + rx*scale*0.46 + Math.sin(p.angle)*2;
+      const y = cy + ry*scale*0.46*-1 + Math.cos(p.angle)*2;
+      const alpha = 0.45 + 0.45*Math.sin(p.twinkle);
+      ctx.beginPath();
+      ctx.fillStyle = p.hue==='pink'
+        ? `rgba(255,143,179,${alpha})`
+        : `rgba(255,215,106,${alpha})`;
+      ctx.arc(x,y,p.size,0,Math.PI*2);
+      ctx.fill();
+    });
+
+    // core glow
+    ctx.beginPath();
+    const coreGlow = ctx.createRadialGradient(cx,cy,0,cx,cy,18);
+    coreGlow.addColorStop(0,'rgba(255,255,255,0.9)');
+    coreGlow.addColorStop(1,'rgba(255,45,110,0)');
+    ctx.fillStyle = coreGlow;
+    ctx.arc(cx,cy,18,0,Math.PI*2);
+    ctx.fill();
+
+    // orbiting labels
+    ctx.font = '11px Quicksand, sans-serif';
+    ctx.textAlign = 'center';
+    labels.forEach(l=>{
+      l.angle += l.speed*0.01;
+      const lx = cx + Math.cos(l.angle)*Math.min(w,h)*l.radius*0.5;
+      const ly = cy + Math.sin(l.angle)*Math.min(w,h)*l.radius*0.32;
+      ctx.fillStyle = 'rgba(245,236,255,0.55)';
+      ctx.save();
+      ctx.translate(lx,ly);
+      ctx.fillText(l.word, 0, 0);
+      ctx.restore();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---------------- scroll reveal for cards & letter ---------------- */
+(function(){
+  const targets = document.querySelectorAll('.card, .letter-card');
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) e.target.classList.add('in');
+    });
+  }, { threshold: 0.25 });
+  targets.forEach(t=>obs.observe(t));
+})();
+
+/* ---------------- hug button burst ---------------- */
+(function(){
+  const btn = document.getElementById('hugBtn');
+  const burst = document.getElementById('burst');
+  const msg = document.getElementById('hugMsg');
+  const emojis = ['🤗','❤️','💗','✨','💕'];
+  btn.addEventListener('click', ()=>{
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    for(let i=0;i<26;i++){
+      const s = document.createElement('span');
+      s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      const angle = Math.random()*Math.PI*2;
+      const dist = 120 + Math.random()*220;
+      const dx = Math.cos(angle)*dist;
+      const dy = Math.sin(angle)*dist - 80;
+      s.style.left = cx+'px';
+      s.style.top = cy+'px';
+      s.style.transition = `transform ${0.9+Math.random()*0.6}s cubic-bezier(.2,.7,.3,1), opacity ${0.9+Math.random()*0.6}s ease`;
+      burst.appendChild(s);
+      requestAnimationFrame(()=>{
+        s.style.opacity = '1';
+        s.style.transform = `translate(${dx}px, ${dy}px) scale(${0.8+Math.random()*0.8}) rotate(${(Math.random()*2-1)*180}deg)`;
+      });
+      setTimeout(()=>{ s.style.opacity = '0'; }, 700);
+      setTimeout(()=>s.remove(), 1700);
+    }
+    msg.classList.add('show');
+  });
+})();
+</script>
+</body>
+</html>
